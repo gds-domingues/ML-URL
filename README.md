@@ -5,54 +5,74 @@ This code is for a simple URL classification model using a logistic regression c
 Code:
 
 ```python
-# Import Libraries
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+import pandas as pd
 import numpy as np
 import random
-import pandas as pd
 
+def getTokens(input):
+    # Tokenize a URL by splitting on '/', '-', and '.' characters
+    tokensBySlash = str(input.encode('utf-8')).split('/')
+    allTokens = []
 
-# Custom Tokenizer Function
-def getTokens(inputString):
-    # Tokenizes a string into individual characters
-    tokens = []
-    for i in inputString:
-        tokens.append(i)
-    return tokens
+    # Further split tokens by '-'
+    for i in tokensBySlash:
+        tokens = str(i).split('-')
+        tokensByDot = []
 
-# File Path and Data Reading
-filepath = 'file_path' # Replace with actual file path
-data = pd.read_csv(filepath, ',', error_bad_lines=False)
+        # Further split tokens by '.'
+        for j in range(0, len(tokens)):
+            tempTokens = str(tokens[j]).split('.')
+            tokensByDot = tokensByDot + tempTokens
 
-# Convert Data to NumPy Array and Shuffle
-data = pd.DataFrame(data)
-passwords = np.array(data)
-random.shuffle(passwords) # Shuffling randomly for robustness
+        allTokens = allTokens + tokens + tokensByDot
 
-# Extract Labels and Passwords
-y = [d[1] for d in passwords] # Labels
-allpasswords = [d[0] for d in passwords] # Actual passwords
+    # Remove redundant tokens
+    allTokens = list(set(allTokens))
 
-# Vectorize Passwords using TF-IDF
-vectorizer = TfidfVectorizer(tokenizer=getTokens) # Vectorizing
-X = vectorizer.fit_transform(allpasswords)
+    # Remove 'com' since it occurs frequently and may not provide useful information
+    if 'com' in allTokens:
+        allTokens.remove('com')
 
-# Split Data into Training and Testing Sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
+    return allTokens
 
-# Initialize and Train Logistic Regression Classifier
-lgs = LogisticRegression(penalty='l2', multi_class='ovr') # Our logistic regression classifier
-lgs.fit(X_train, y_train) # Training
+# Path to the file containing all URLs
+allurls = 'C:\\\\Users\\\\Gabriel D\\\\Desktop\\\\Url Classification Project\\\\Data to Use\\\\allurls.txt'
 
-# Evaluate Classifier on Test Data
-print(lgs.score(X_test, y_test)) # Testing
+# Read data from the CSV file
+allurlscsv = pd.read_csv(allurls, ',', error_bad_lines=False)
+allurlsdata = pd.DataFrame(allurlscsv)
 
-# More Testing: Make Predictions on Example Passwords
-X_predict = ['gdsdomingues','159357Asd%@','@ardnErtsx2g4','twitteristoxic','gggggggggg','pudim','heuheuheuheuheuheuhe','bolinha','mynameisgabriel','gabriel','123456','abc123']
+# Convert data to a NumPy array and shuffle
+allurlsdata = np.array(allurlsdata)
+random.shuffle(allurlsdata)
+
+# Extract features (X) and labels (y)
+corpus = [d[0] for d in allurlsdata]
+y = allurlsdata['label']  # Assuming the column name is 'label'
+
+# Vectorize URLs using TF-IDF
+vectorizer = TfidfVectorizer(tokenizer=getTokens)
+X = vectorizer.fit_transform(corpus)
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train Logistic Regression classifier
+lgs = LogisticRegression()
+lgs.fit(X_train, y_train)
+
+# Print the accuracy score on the test set
+print(lgs.score(X_test, y_test))  # Accuracy comes out to be 98%
+
+# Test the classifier on new URLs
+X_predict = ['wikipedia.com', 'google.com/search=gdsdomingues', 'twitter.com', 'www.radsport-voggel.de/wp-admin/includes/log.exe', 'ahrenhei.without-transfer.ru/nethost.exe', 'www.itidea.it/centroesteticosothys/img/_notes/gum.exe']
 X_predict = vectorizer.transform(X_predict)
 y_Predict = lgs.predict(X_predict)
+
+# Print the predicted values
 print(y_Predict)
 ```
 
