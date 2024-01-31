@@ -6,41 +6,66 @@ Code:
 
 ```python
 def getTokens(input):
-	tokensBySlash = str(input.encode('utf-8')).split('/')	#get tokens after splitting by slash
-	allTokens = []
-	for i in tokensBySlash:
-		tokens = str(i).split('-')	#get tokens after splitting by dash
-		tokensByDot = []
-		for j in range(0,len(tokens)):
-			tempTokens = str(tokens[j]).split('.')	#get tokens after splitting by dot
-			tokensByDot = tokensByDot + tempTokens
-		allTokens = allTokens + tokens + tokensByDot
-	allTokens = list(set(allTokens))	#remove redundant tokens
-	if 'com' in allTokens:
-		allTokens.remove('com')	#removing .com since it occurs a lot of times and it should not be included in our features
-		return allTokens
+    # Tokenize a URL by splitting on '/', '-', and '.' characters
+    tokensBySlash = str(input.encode('utf-8')).split('/')
+    allTokens = []
 
-allurls = 'C:\\\\Users\\\\Gabriel D\\\\Desktop\\\\Url Classification Project\\\\Data to Use\\\\allurls.txt'	#path to our all urls file
-allurlscsv = pd.read_csv(allurls,',',error_bad_lines=False)	#reading file
-allurlsdata = pd.DataFrame(allurlscsv)	#converting to a dataframe
- 
-allurlsdata = np.array(allurlsdata)	#converting it into an array
-random.shuffle(allurlsdata)	#shuffling
+    # Further split tokens by '-'
+    for i in tokensBySlash:
+        tokens = str(i).split('-')
+        tokensByDot = []
 
-corpus = [d[0] for d in allurlsdata]	#all urls corresponding to a label (either good or bad)
-vectorizer = TfidfVectorizer(tokenizer=getTokens)	#get a vector for each url but use our customized tokenizer
-X = vectorizer.fit_transform(corpus) #get the X vector
+        # Further split tokens by '.'
+        for j in range(0, len(tokens)):
+            tempTokens = str(tokens[j]).split('.')
+            tokensByDot = tokensByDot + tempTokens
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)	#split into training and testing set 80/20 ratio
+        allTokens = allTokens + tokens + tokensByDot
 
-lgs = LogisticRegression()	#using logistic regression
+    # Remove redundant tokens
+    allTokens = list(set(allTokens))
+
+    # Remove 'com' since it occurs frequently and may not provide useful information
+    if 'com' in allTokens:
+        allTokens.remove('com')
+
+    return allTokens
+
+# Path to the file containing all URLs
+allurls = 'C:\\\\Users\\\\Gabriel D\\\\Desktop\\\\Url Classification Project\\\\Data to Use\\\\allurls.txt'
+
+# Read data from the CSV file
+allurlscsv = pd.read_csv(allurls, ',', error_bad_lines=False)
+allurlsdata = pd.DataFrame(allurlscsv)
+
+# Convert data to a NumPy array and shuffle
+allurlsdata = np.array(allurlsdata)
+random.shuffle(allurlsdata)
+
+# Extract features (X) and labels (y)
+corpus = [d[0] for d in allurlsdata]
+
+# Vectorize URLs using TF-IDF
+vectorizer = TfidfVectorizer(tokenizer=getTokens)
+X = vectorizer.fit_transform(corpus)
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train Logistic Regression classifier
+lgs = LogisticRegression()
 lgs.fit(X_train, y_train)
-print(lgs.score(X_test, y_test)) #pring the score. It comes out to be 98%
 
-X_predict = ['wikipedia.com','google.com/search=gdsdomingues','twitter.com','www.radsport-voggel.de/wp-admin/includes/log.exe','ahrenhei.without-transfer.ru/nethost.exe','www.itidea.it/centroesteticosothys/img/_notes/gum.exe']
+# Print the accuracy score on the test set
+print(lgs.score(X_test, y_test))  # Accuracy comes out to be 98%
+
+# Test the classifier on new URLs
+X_predict = ['wikipedia.com', 'google.com/search=gdsdomingues', 'twitter.com', 'www.radsport-voggel.de/wp-admin/includes/log.exe', 'ahrenhei.without-transfer.ru/nethost.exe', 'www.itidea.it/centroesteticosothys/img/_notes/gum.exe']
 X_predict = vectorizer.transform(X_predict)
 y_Predict = lgs.predict(X_predict)
-print y_Predict #printing predicted values
+
+# Print the predicted values
+print(y_Predict)
 ```
 
 **Gathering Data Explanation:**
