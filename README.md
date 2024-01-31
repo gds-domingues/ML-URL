@@ -18,7 +18,7 @@ def getTokens(input):
 	allTokens = list(set(allTokens))	#remove redundant tokens
 	if 'com' in allTokens:
 		allTokens.remove('com')	#removing .com since it occurs a lot of times and it should not be included in our features
-return allTokens
+		return allTokens
 
 allurls = 'C:\\\\Users\\\\Gabriel D\\\\Desktop\\\\Url Classification Project\\\\Data to Use\\\\allurls.txt'	#path to our all urls file
 allurlscsv = pd.read_csv(allurls,',',error_bad_lines=False)	#reading file
