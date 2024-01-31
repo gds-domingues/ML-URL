@@ -1,5 +1,13 @@
+# Gabriel Domingues Silva
+# gabriel.domingues.silva@usp.br
+# github.com/gds-domingues
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+import pandas as pd
+import numpy as np
+import random
 
 def getTokens(input):
     # Tokenize a URL by splitting on '/', '-', and '.' characters
@@ -40,6 +48,7 @@ random.shuffle(allurlsdata)
 
 # Extract features (X) and labels (y)
 corpus = [d[0] for d in allurlsdata]
+y = allurlsdata['label']  # Assuming the column name is 'label'
 
 # Vectorize URLs using TF-IDF
 vectorizer = TfidfVectorizer(tokenizer=getTokens)
