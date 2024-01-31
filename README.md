@@ -1,4 +1,4 @@
-# ML-URL
+# Machine Learning for Malicious URL
 
 This code is for a simple URL classification model using a logistic regression classifier. It involves the following steps:
 
